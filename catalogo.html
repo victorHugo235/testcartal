@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineTrack | Catálogo de Filmes</title>
+    <meta name="description" content="Catálogo de filmes do CineTrack com pesquisa, gêneros, prévias e Minha Lista.">
+
+    <!-- TailwindCSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen bg-[#0b0f19] text-gray-200 flex flex-col selection:bg-red-500 selection:text-white overflow-x-hidden">
+
+    <!-- ===================== CABEÇALHO ===================== -->
+    <header class="sticky top-0 z-40 bg-[#0b0f19]/90 backdrop-blur-md border-b border-gray-800/80">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-3">
+
+            <a href="catalogo.html" class="order-1 flex items-center gap-3">
+                <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-tr from-red-600 to-red-800 text-white border border-red-500/30">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>
+                </span>
+                <span class="text-xl font-extrabold tracking-tight text-white">Cine<span class="text-red-500">Track</span></span>
+            </a>
+
+            <nav class="order-2 hidden sm:flex items-center gap-1 text-sm font-semibold" aria-label="Navegação principal">
+                <button type="button" id="nav-home" class="px-3 py-2 rounded-lg transition-colors">Início</button>
+                <button type="button" id="nav-list" class="px-3 py-2 rounded-lg transition-colors">Minha Lista <span id="badge-list" class="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-red-600 text-white">0</span></button>
+            </nav>
+
+            <div class="order-4 md:order-3 w-full md:w-auto md:flex-1 md:max-w-md md:ml-auto relative">
+                <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+                <input id="busca" type="search" autocomplete="off" placeholder="Pesquisar por título, autor, produtora ou gênero"
+                    class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-900 border border-gray-700/80 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all">
+            </div>
+
+            <!-- Conta -->
+            <div class="order-3 md:order-4 ml-auto md:ml-0 relative">
+                <button type="button" id="btn-conta" class="flex items-center gap-2 p-1 pr-3 rounded-full bg-gray-900 border border-gray-700/80 hover:border-red-500 transition-colors" aria-haspopup="true">
+                    <span id="avatar" class="w-8 h-8 rounded-full bg-gradient-to-tr from-red-600 to-orange-500 flex items-center justify-center text-sm font-bold text-white">?</span>
+                    <span id="conta-nome" class="hidden sm:block text-sm font-medium max-w-[8rem] truncate">Conta</span>
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div id="menu-conta" class="hidden absolute right-0 mt-2 w-56 rounded-2xl bg-[#111827] border border-gray-800 shadow-2xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-800">
+                        <p id="menu-nome" class="text-sm font-semibold text-white truncate"></p>
+                        <p id="menu-email" class="text-xs text-gray-500 truncate"></p>
+                    </div>
+                    <button type="button" data-acao="conta" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-800 transition-colors">Minha conta</button>
+                    <button type="button" data-acao="lista" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-800 transition-colors">Minha Lista</button>
+                    <button type="button" data-acao="config" class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-800 transition-colors">Configurações</button>
+                    <button type="button" data-acao="sair" class="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-gray-800 border-t border-gray-800 transition-colors">Sair</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 py-6">
+
+        <!-- ===================== DESTAQUE ===================== -->
+        <section id="hero" class="relative overflow-hidden rounded-3xl border border-gray-800 min-h-[22rem] sm:min-h-[26rem] flex items-end bg-gradient-to-br from-red-900 to-[#0b0f19]" aria-label="Filme em destaque">
+            <img id="hero-img" alt="" class="hidden lg:block absolute z-10 right-10 top-1/2 -translate-y-1/2 h-[82%] aspect-[3/4] object-cover rounded-xl shadow-2xl shadow-black/60 ring-1 ring-white/10" onerror="this.remove()">
+            <video id="hero-video" muted loop playsinline class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"></video>
+            <div class="absolute inset-0 bg-gradient-to-r from-[#0b0f19] via-[#0b0f19]/60 to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0b0f19] via-transparent to-transparent"></div>
+            <div class="relative p-6 sm:p-10 max-w-2xl">
+                <p id="hero-genero" class="text-xs font-semibold uppercase tracking-widest text-red-400"></p>
+                <h1 id="hero-titulo" class="mt-2 text-4xl sm:text-6xl font-extrabold text-white tracking-tight drop-shadow"></h1>
+                <div id="hero-meta" class="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-300"></div>
+                <p id="hero-resumo" class="mt-4 text-gray-300 leading-relaxed line-clamp-3"></p>
+                <div class="mt-6 flex flex-wrap gap-3">
+                    <button type="button" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold text-sm transition-all hover:shadow-lg hover:shadow-red-600/30">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.8A1 1 0 004.8 3.7v12.6a1 1 0 001.5.9l10.5-6.3a1 1 0 000-1.7L6.3 2.8z"/></svg>
+                        <span>Assistir</span>
+                    </button>
+                    <button type="button" id="hero-info" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur text-white font-semibold text-sm transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Mais informações</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== GÊNEROS ===================== -->
+        <div id="chips" class="mt-6 flex flex-wrap gap-2" role="group" aria-label="Filtrar por gênero"></div>
+
+        <!-- ===================== CONTEÚDO ===================== -->
+        <div id="conteudo" class="mt-6"></div>
+    </main>
+
+    <!-- ===================== RODAPÉ ===================== -->
+    <footer class="w-full text-center text-xs text-gray-500 py-6 border-t border-gray-800/60">
+        2026 CineTrack &bull; Controle de Catálogo de Filmes &bull; Tecnologia Oliveira
+    </footer>
+
+    <!-- ===================== MODAL: FILME ===================== -->
+    <div id="modal-filme" class="hidden fixed inset-0 z-50 items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="m-titulo">
+        <div data-fechar class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <article class="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl bg-[#111827] border border-gray-800 shadow-2xl">
+            <button type="button" data-fechar class="absolute top-4 right-4 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-black/60 text-gray-200 hover:bg-red-600 transition-colors" aria-label="Fechar">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+
+            <!-- Prévia / trailer -->
+            <div class="relative aspect-video bg-black">
+                <video id="m-video" controls playsinline class="w-full h-full object-cover"></video>
+                <span class="absolute bottom-3 left-3 text-[10px] font-semibold uppercase tracking-widest px-2 py-1 rounded bg-black/70 text-gray-200 pointer-events-none">Prévia</span>
+            </div>
+
+            <div class="grid sm:grid-cols-[11rem_1fr] gap-6 p-6 sm:p-8">
+                <div class="hidden sm:block">
+                    <div class="relative aspect-[3/4] rounded-xl overflow-hidden bg-gradient-to-br shadow-lg shadow-black/50" id="m-capa-box">
+                        <img id="m-capa" alt="" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">
+                    </div>
+                </div>
+                <div>
+                    <p id="m-genero" class="text-xs font-semibold uppercase tracking-widest text-red-500"></p>
+                    <h2 id="m-titulo" class="mt-1 text-3xl font-extrabold text-white tracking-tight"></h2>
+                    <div id="m-meta" class="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-300"></div>
+                    <p id="m-resumo" class="mt-5 text-gray-300 leading-relaxed"></p>
+                    <dl class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div><dt class="text-xs uppercase tracking-wider text-gray-500">Autor</dt><dd id="m-autor" class="text-gray-100 font-medium"></dd></div>
+                        <div><dt class="text-xs uppercase tracking-wider text-gray-500">Produtora</dt><dd id="m-produtora" class="text-gray-100 font-medium"></dd></div>
+                        <div><dt class="text-xs uppercase tracking-wider text-gray-500">Lançamento</dt><dd id="m-ano" class="text-gray-100 font-medium"></dd></div>
+                    </dl>
+                    <div class="mt-7 flex flex-wrap gap-3">
+                        <button type="button" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold text-sm transition-all hover:shadow-lg hover:shadow-red-600/30">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.8A1 1 0 004.8 3.7v12.6a1 1 0 001.5.9l10.5-6.3a1 1 0 000-1.7L6.3 2.8z"/></svg>
+                            <span>Assistir</span>
+                        </button>
+                        <button type="button" id="m-salvar" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm transition-all"></button>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <!-- ===================== MODAL: CONFIGURAÇÕES ===================== -->
+    <div id="modal-config" class="hidden fixed inset-0 z-50 items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="cfg-titulo">
+        <div data-fechar class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <section class="relative w-full max-w-md max-h-[92vh] overflow-y-auto rounded-3xl bg-[#111827] border border-gray-800 shadow-2xl p-6 sm:p-8">
+            <button type="button" data-fechar class="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-black/40 text-gray-300 hover:bg-red-600 hover:text-white transition-colors" aria-label="Fechar">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <h2 id="cfg-titulo" class="text-2xl font-extrabold text-white">Configurações</h2>
+            <p class="mt-1 text-sm text-gray-500">As preferências ficam salvas neste navegador.</p>
+
+            <div class="mt-6 space-y-5">
+                <label class="flex items-center justify-between gap-4 cursor-pointer">
+                    <span><span class="block text-sm font-semibold text-gray-100">Prévia automática</span><span class="block text-xs text-gray-500">Toca o vídeo no destaque e ao abrir um filme.</span></span>
+                    <span class="relative inline-flex shrink-0">
+                        <input type="checkbox" id="cfg-auto" class="peer sr-only">
+                        <span class="w-11 h-6 rounded-full bg-gray-700 peer-checked:bg-red-600 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-red-500"></span>
+                        <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform peer-checked:translate-x-5"></span>
+                    </span>
+                </label>
+
+                <label class="flex items-center justify-between gap-4 cursor-pointer">
+                    <span><span class="block text-sm font-semibold text-gray-100">Prévia com som</span><span class="block text-xs text-gray-500">Ativa o áudio nas prévias dos filmes.</span></span>
+                    <span class="relative inline-flex shrink-0">
+                        <input type="checkbox" id="cfg-som" class="peer sr-only">
+                        <span class="w-11 h-6 rounded-full bg-gray-700 peer-checked:bg-red-600 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-red-500"></span>
+                        <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform peer-checked:translate-x-5"></span>
+                    </span>
+                </label>
+
+                <div>
+                    <label for="cfg-idade" class="block text-sm font-semibold text-gray-100">Classificação máxima</label>
+                    <p class="text-xs text-gray-500 mb-2">Esconde filmes acima da faixa etária escolhida.</p>
+                    <select id="cfg-idade" class="w-full px-4 py-3 rounded-xl bg-gray-900 border border-gray-700/80 text-sm text-white focus:outline-none focus:ring-2 focus:ring-red-500">
+                        <option value="L">Livre</option>
+                        <option value="10">Até 10 anos</option>
+                        <option value="12">Até 12 anos</option>
+                        <option value="14">Até 14 anos</option>
+                        <option value="16">Até 16 anos</option>
+                        <option value="18">Todas (até 18 anos)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-gray-800 flex flex-wrap gap-3">
+                <button type="button" id="cfg-limpar" class="px-4 py-2.5 rounded-xl border border-gray-700 hover:border-red-500 text-sm font-semibold text-gray-200 transition-colors">Limpar Minha Lista</button>
+                <button type="button" id="cfg-padrao" class="px-4 py-2.5 rounded-xl border border-gray-700 hover:border-red-500 text-sm font-semibold text-gray-200 transition-colors">Restaurar padrões</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- ===================== MODAL: CONTA ===================== -->
+    <div id="modal-conta" class="hidden fixed inset-0 z-50 items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="cta-titulo">
+        <div data-fechar class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <section class="relative w-full max-w-md rounded-3xl bg-[#111827] border border-gray-800 shadow-2xl p-6 sm:p-8 text-center">
+            <button type="button" data-fechar class="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-black/40 text-gray-300 hover:bg-red-600 hover:text-white transition-colors" aria-label="Fechar">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <span id="cta-avatar" class="mx-auto w-20 h-20 rounded-full bg-gradient-to-tr from-red-600 to-orange-500 flex items-center justify-center text-3xl font-extrabold text-white shadow-lg shadow-red-950/50">?</span>
+            <h2 id="cta-titulo" class="mt-4 text-2xl font-extrabold text-white"></h2>
+            <p id="cta-email" class="text-sm text-gray-400"></p>
+
+            <div class="mt-6 grid grid-cols-2 gap-3">
+                <div class="rounded-2xl bg-gray-900 border border-gray-800 p-4">
+                    <p id="cta-qtd" class="text-2xl font-extrabold text-white">0</p>
+                    <p class="text-xs uppercase tracking-wider text-gray-500">Filmes na lista</p>
+                </div>
+                <div class="rounded-2xl bg-gray-900 border border-gray-800 p-4">
+                    <p id="cta-total" class="text-2xl font-extrabold text-white">0</p>
+                    <p class="text-xs uppercase tracking-wider text-gray-500">Filmes no catálogo</p>
+                </div>
+            </div>
+
+            <div class="mt-6 flex flex-col gap-3">
+                <button type="button" data-acao="lista" class="w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 text-sm font-semibold text-white transition-colors">Ver Minha Lista</button>
+                <button type="button" data-acao="sair" class="w-full py-3 rounded-xl bg-red-600 hover:bg-red-700 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-red-600/30">Sair da conta</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        /* ============================================================
+           PRÉVIA (TRAILER): troque este link pelo trailer real de cada filme
+           (campo "trailer" nos filmes abaixo). Aqui usamos um vídeo de exemplo.
+           ============================================================ */
+        const VIDEO_EXEMPLO = 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4';
+
+        // Capas: imagens de exemplo (picsum.photos). Troque por "capa" com o link da imagem real.
+        const capaPadrao = (slug) => 'https://picsum.photos/seed/' + slug + '/400/600';
+
+        const IDADES = ['L', '10', '12', '14', '16', '18'];
+        const COR_IDADE = {
+            'L': 'bg-green-600', '10': 'bg-blue-600', '12': 'bg-yellow-500 text-black',
+            '14': 'bg-orange-500', '16': 'bg-red-600', '18': 'bg-black border border-gray-600'
+        };
+
+        const FILMES = [
+            { id: 1, capa: 'capas/01-horizonte-vermelho.jpg', nome: 'Horizonte Vermelho', ano: 2025, genero: 'Ficção Científica', autor: 'Helena Duarte', produtora: 'Aurora Films', idade: '14', cor: 'from-red-700 to-orange-500', resumo: 'Quando um planeta vizinho passa a emitir sinais de rádio, uma astrofísica lidera a missão que pode revelar se a humanidade está sozinha.' },
+            { id: 2, capa: 'capas/02-a-ultima-estacao.jpg', nome: 'A Última Estação', ano: 2024, genero: 'Drama', autor: 'Rafael Monteiro', produtora: 'Lume Produções', idade: '12', cor: 'from-sky-700 to-indigo-600', resumo: 'Em uma pequena cidade ferroviária prestes a ser desativada, três gerações de uma família precisam decidir o que fazer com o passado.' },
+            { id: 3, capa: 'capas/03-sombras-do-sertao.jpg', nome: 'Sombras do Sertão', ano: 2023, genero: 'Suspense', autor: 'Camila Barros', produtora: 'Cacto Filmes', idade: '16', cor: 'from-amber-700 to-stone-800', resumo: 'Uma jornalista volta ao interior para investigar um desaparecimento e descobre que o vilarejo guarda segredos perigosos.' },
+            { id: 4, capa: 'capas/04-o-farol-de-cristal.jpg', nome: 'O Farol de Cristal', ano: 2025, genero: 'Aventura', autor: 'Tiago Nogueira', produtora: 'Maré Alta Studios', idade: 'L', cor: 'from-teal-600 to-cyan-400', resumo: 'Duas crianças encontram um mapa antigo e partem em busca de um farol mágico que, segundo a lenda, controla as marés.' },
+            { id: 5, capa: 'capas/05-noite-em-lisboa.jpg', nome: 'Noite em Lisboa', ano: 2022, genero: 'Romance', autor: 'Inês Carvalho', produtora: 'Fado Pictures', idade: '12', cor: 'from-fuchsia-700 to-rose-500', resumo: 'Durante uma única noite na capital portuguesa, dois desconhecidos se esbarram, se perdem e mudam o rumo um do outro.' },
+            { id: 6, capa: 'capas/06-rota-zero.jpg', nome: 'Rota Zero', ano: 2024, genero: 'Ação', autor: 'Bruno Vasconcelos', produtora: 'Ferro & Fogo Produções', idade: '16', cor: 'from-zinc-800 to-red-600', resumo: 'Um ex-piloto de resgate tem apenas doze horas para cruzar o país e impedir uma operação criminosa de grande escala.' },
+            { id: 7, capa: 'capas/07-ilha-dos-ventos.jpg', nome: 'Ilha dos Ventos', ano: 2023, genero: 'Aventura', autor: 'Marina Leal', produtora: 'Bússola Films', idade: '10', cor: 'from-emerald-600 to-lime-400', resumo: 'Um grupo de amigos naufraga em uma ilha misteriosa e precisa trabalhar em equipe para encontrar o caminho de volta.' },
+            { id: 8, capa: 'capas/08-codigo-fenix.jpg', nome: 'Código Fênix', ano: 2025, genero: 'Ação', autor: 'Diego Salgado', produtora: 'Fênix Entertainment', idade: '14', cor: 'from-orange-600 to-yellow-400', resumo: 'Uma agente em desgraça é chamada de volta para desarmar uma rede de hackers que ameaça a rede elétrica de uma metrópole.' },
+            { id: 9, capa: 'capas/09-vale-dos-gigantes.jpg', nome: 'Vale dos Gigantes', ano: 2021, genero: 'Fantasia', autor: 'Luiza Pacheco', produtora: 'Montanha Azul', idade: '10', cor: 'from-blue-800 to-violet-500', resumo: 'Uma jovem pastora descobre que as montanhas de sua aldeia escondem criaturas antigas que só ela consegue ouvir.' },
+            { id: 10, capa: 'capas/10-corrida-final.jpg', nome: 'Corrida Final', ano: 2022, genero: 'Ação', autor: 'André Matos', produtora: 'Velocidade Studios', idade: '12', cor: 'from-neutral-800 to-sky-500', resumo: 'Na última etapa de um campeonato clandestino, um piloto veterano enfrenta rivais, dívidas e a própria reputação.' },
+            { id: 11, capa: 'capas/11-a-casa-do-eco.jpg', nome: 'A Casa do Eco', ano: 2024, genero: 'Terror', autor: 'Paulo Teixeira', produtora: 'Névoa Films', idade: '18', cor: 'from-slate-900 to-purple-800', resumo: 'Uma família se muda para uma casa onde cada som ecoa com segundos de atraso, como se alguém estivesse repetindo tudo.' },
+            { id: 12, capa: 'capas/12-ultimo-sinal.jpg', nome: 'Último Sinal', ano: 2023, genero: 'Suspense', autor: 'Renata Faria', produtora: 'Sinal Aberto', idade: '16', cor: 'from-gray-900 to-blue-700', resumo: 'Uma operadora de emergência recebe uma ligação que termina no meio de uma frase e decide encontrar quem ligou.' },
+            { id: 13, capa: 'capas/13-quarto-13.jpg', nome: 'Quarto 13', ano: 2025, genero: 'Terror', autor: 'Otávio Lins', produtora: 'Lua Negra Produções', idade: '18', cor: 'from-black to-red-800', resumo: 'Um hotel antigo não tem o décimo terceiro quarto, mas todo hóspede jura ter ouvido alguém batendo à porta.' },
+            { id: 14, capa: 'capas/14-jardim-sombrio.jpg', nome: 'Jardim Sombrio', ano: 2022, genero: 'Suspense', autor: 'Sofia Andrade', produtora: 'Raiz Filmes', idade: '14', cor: 'from-green-900 to-stone-700', resumo: 'A nova jardineira de uma mansão percebe que as plantas só florescem em lugares onde algo foi enterrado.' },
+            { id: 15, capa: 'capas/15-o-colecionador-de-relogios.jpg', nome: 'O Colecionador de Relógios', ano: 2021, genero: 'Mistério', autor: 'Henrique Prado', produtora: 'Ponteiro Studios', idade: '14', cor: 'from-yellow-800 to-neutral-900', resumo: 'Um relojoeiro recebe encomendas de peças que param exatamente na hora de acontecimentos que ainda não aconteceram.' },
+            { id: 16, capa: 'capas/16-dia-de-sorte.jpg', nome: 'Dia de Sorte', ano: 2024, genero: 'Comédia', autor: 'Fernanda Ribeiro', produtora: 'Riso Solto Filmes', idade: '12', cor: 'from-yellow-500 to-pink-500', resumo: 'Depois de ganhar na loteria sem querer, um entregador de pizza precisa esconder o prêmio da família mais curiosa do bairro.' },
+            { id: 17, capa: 'capas/17-os-vizinhos-do-7-andar.jpg', nome: 'Os Vizinhos do 7º Andar', ano: 2023, genero: 'Comédia', autor: 'Caio Freitas', produtora: 'Prédio Azul Produções', idade: '10', cor: 'from-cyan-600 to-blue-500', resumo: 'Um prédio inteiro entra em guerra por causa de uma vaga de garagem, e cada andar tem a sua versão da história.' },
+            { id: 18, capa: 'capas/18-pequeno-astronauta.jpg', nome: 'Pequeno Astronauta', ano: 2025, genero: 'Animação', autor: 'Lara Mendes', produtora: 'Estrela Doce Animações', idade: 'L', cor: 'from-indigo-600 to-pink-400', resumo: 'Um menino que sonha com as estrelas constrói um foguete de papelão e acaba numa viagem inesquecível pela Via Láctea.' },
+            { id: 19, capa: 'capas/19-a-floresta-que-cantava.jpg', nome: 'A Floresta que Cantava', ano: 2022, genero: 'Animação', autor: 'Bruna Costa', produtora: 'Folha Verde Studios', idade: 'L', cor: 'from-green-600 to-emerald-300', resumo: 'Os animais de uma floresta perdem a sua canção e uma pequena coruja parte para descobrir quem a roubou.' },
+            { id: 20, capa: 'capas/20-oceanos-invisiveis.jpg', nome: 'Oceanos Invisíveis', ano: 2024, genero: 'Documentário', autor: 'Marcos Aguiar', produtora: 'Azul Profundo Docs', idade: 'L', cor: 'from-blue-900 to-teal-500', resumo: 'Cientistas mergulham em regiões ainda inexploradas e mostram a vida que existe longe da luz do sol.' },
+            { id: 21, capa: 'capas/21-vozes-do-morro.jpg', nome: 'Vozes do Morro', ano: 2023, genero: 'Documentário', autor: 'Jéssica Moura', produtora: 'Quintal Filmes', idade: '12', cor: 'from-orange-700 to-rose-700', resumo: 'Moradores de uma comunidade contam, em primeira pessoa, como a música transformou a vida do bairro.' },
+            { id: 22, capa: 'capas/22-cartas-para-ana.jpg', nome: 'Cartas para Ana', ano: 2025, genero: 'Romance', autor: 'Gustavo Reis', produtora: 'Papel & Tinta', idade: '12', cor: 'from-rose-600 to-amber-400', resumo: 'Um carteiro encontra cartas nunca entregues e decide, uma a uma, descobrir quem era Ana.' },
+            { id: 23, capa: 'capas/23-imperio-de-areia.jpg', nome: 'Império de Areia', ano: 2021, genero: 'Aventura', autor: 'Leonardo Cunha', produtora: 'Duna Dourada Films', idade: '14', cor: 'from-yellow-700 to-orange-900', resumo: 'Uma arqueóloga atravessa o deserto atrás de uma cidade perdida e descobre que não é a única procurando.' },
+            { id: 24, capa: 'capas/24-protocolo-netuno.jpg', nome: 'Protocolo Netuno', ano: 2024, genero: 'Ficção Científica', autor: 'Vera Lacerda', produtora: 'Órbita Studios', idade: '14', cor: 'from-blue-900 to-fuchsia-600', resumo: 'A tripulação de uma estação científica no fim do sistema solar recebe uma ordem que ninguém lembra de ter dado.' }
+        ];
+
+        /* ---------- Utilidades ---------- */
+        const $ = (id) => document.getElementById(id);
+        const slug = (t) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const norm = (t) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        const idadeTxt = (i) => i === 'L' ? 'Livre' : i + ' anos';
+        FILMES.forEach(f => { f.capa = f.capa || capaPadrao(slug(f.nome)); f.trailer = f.trailer || VIDEO_EXEMPLO; });
+
+        function lerJSON(chave, padrao) {
+            try { const v = JSON.parse(localStorage.getItem(chave)); return v === null ? padrao : v; } catch (e) { return padrao; }
+        }
+        function salvarJSON(chave, valor) {
+            try { localStorage.setItem(chave, JSON.stringify(valor)); } catch (e) { /* ignora */ }
+        }
+
+        /* ---------- Sessão (protege a página) ---------- */
+        // ---- Sessão (funciona mesmo se o navegador bloquear o armazenamento) ----
+        const CHAVE_SESSAO = 'cinetrack_session';
+        function guardarSessao(s) {
+            try { sessionStorage.setItem(CHAVE_SESSAO, JSON.stringify(s)); } catch (e) { }
+            try { window.name = 'cinetrack:' + JSON.stringify(s); } catch (e) { }
+        }
+        function lerSessao() {
+            try { const v = sessionStorage.getItem(CHAVE_SESSAO); if (v) return JSON.parse(v); } catch (e) { }
+            try { if (window.name.indexOf('cinetrack:') === 0) return JSON.parse(window.name.slice(10)); } catch (e) { }
+            return null;
+        }
+        function limparSessao() {
+            try { sessionStorage.removeItem(CHAVE_SESSAO); } catch (e) { }
+            try { window.name = ''; } catch (e) { }
+        }
+        let sessao = lerSessao();
+        if (!sessao || !sessao.email) { window.location.replace('index.html'); }
+        sessao = sessao || { nome: 'Visitante', email: '' };
+
+        /* ---------- Estado ---------- */
+        const PADRAO = { auto: true, som: false, maxIdade: '18' };
+        let cfg = Object.assign({}, PADRAO, lerJSON('cinetrack_config', {}));
+        const CHAVE_LISTA = 'cinetrack_lista_' + sessao.email;
+        let lista = lerJSON(CHAVE_LISTA, []);
+        let view = 'home';      // 'home' | 'lista'
+        let genero = 'Todos';
+        let busca = '';
+        let filmeAberto = null;
+
+        const visiveis = () => FILMES.filter(f => IDADES.indexOf(f.idade) <= IDADES.indexOf(cfg.maxIdade));
+        const salvo = (id) => lista.indexOf(id) !== -1;
+
+        /* ---------- Componentes ---------- */
+        function seloIdade(i, tam) {
+            return '<span class="inline-flex items-center justify-center rounded font-bold text-white ' + (tam || 'text-[10px] px-1.5 py-0.5') + ' ' + COR_IDADE[i] + '" title="Classificação indicativa: ' + idadeTxt(i) + '">' + i + '</span>';
+        }
+
+        function coracao(ativo) {
+            return '<svg class="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="' + (ativo ? 'currentColor' : 'none') + '"><path stroke-linecap="round" stroke-linejoin="round" d="M4.3 6.3a5 5 0 017.1 0l.6.6.6-.6a5 5 0 117.1 7.1L12 21l-7.7-7.6a5 5 0 010-7.1z"/></svg>';
+        }
+
+        function card(f, grade) {
+            const s = salvo(f.id);
+            return '<article data-id="' + f.id + '" class="group relative cursor-pointer ' + (grade ? 'w-full' : 'shrink-0 snap-start w-40 sm:w-44') + '">' +
+                '<div class="relative aspect-[3/4] rounded-xl overflow-hidden bg-gradient-to-br ' + f.cor + ' shadow-lg shadow-black/50 transition duration-200 group-hover:scale-105 group-hover:ring-2 group-hover:ring-red-500 group-hover:z-10">' +
+                '<div data-fb class="hidden absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent"><div class="absolute bottom-0 inset-x-0 p-3"><p class="text-sm font-extrabold leading-tight text-white drop-shadow">' + f.nome + '</p></div></div>' +
+                '<img src="' + f.capa + '" alt="Capa de ' + f.nome + '" loading="lazy" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove();this.parentNode.querySelector(\'[data-fb]\').classList.remove(\'hidden\')">' +
+                '<div class="absolute top-0 inset-x-0 h-14 bg-gradient-to-b from-black/60 to-transparent pointer-events-none"></div>' +
+                '<div class="absolute top-2 left-2">' + seloIdade(f.idade) + '</div>' +
+                '<button type="button" data-salvar="' + f.id + '" aria-label="' + (s ? 'Remover de' : 'Adicionar à') + ' Minha Lista" class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-black/60 hover:bg-black/80 transition-colors ' + (s ? 'text-red-500' : 'text-white') + '">' + coracao(s) + '</button>' +
+                '<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"><span class="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center text-white shadow-lg"><svg class="w-6 h-6 ml-0.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.8A1 1 0 004.8 3.7v12.6a1 1 0 001.5.9l10.5-6.3a1 1 0 000-1.7L6.3 2.8z"/></svg></span></div>' +
+                '</div>' +
+                '<div class="mt-2"><h3 class="text-sm font-semibold text-gray-100 truncate">' + f.nome + '</h3><p class="text-xs text-gray-500 truncate">' + f.ano + ' &bull; ' + f.genero + '</p></div>' +
+                '</article>';
+        }
+
+        function fileira(titulo, filmes, id) {
+            if (!filmes.length) return '';
+            return '<section class="mt-8" aria-label="' + titulo + '">' +
+                '<h2 class="text-lg sm:text-xl font-bold text-white mb-3">' + titulo + '</h2>' +
+                '<div class="relative group/fileira">' +
+                '<button type="button" data-rolar="-1" data-alvo="' + id + '" aria-label="Rolar para a esquerda" class="hidden md:flex absolute left-0 top-0 bottom-0 z-20 w-10 items-center justify-center bg-gradient-to-r from-[#0b0f19] to-transparent text-white opacity-0 group-hover/fileira:opacity-100 transition-opacity"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg></button>' +
+                '<div id="' + id + '" class="flex gap-4 overflow-x-auto snap-x scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">' + filmes.map(f => card(f, false)).join('') + '</div>' +
+                '<button type="button" data-rolar="1" data-alvo="' + id + '" aria-label="Rolar para a direita" class="hidden md:flex absolute right-0 top-0 bottom-0 z-20 w-10 items-center justify-center bg-gradient-to-l from-[#0b0f19] to-transparent text-white opacity-0 group-hover/fileira:opacity-100 transition-opacity"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg></button>' +
+                '</div></section>';
+        }
+
+        function grade(titulo, filmes, vazio) {
+            let h = '<h2 class="text-lg sm:text-xl font-bold text-white mb-4">' + titulo + '</h2>';
+            if (!filmes.length) {
+                return h + '<div class="rounded-3xl border border-dashed border-gray-800 py-16 text-center"><p class="text-gray-300 font-semibold">' + vazio[0] + '</p><p class="mt-1 text-sm text-gray-500">' + vazio[1] + '</p></div>';
+            }
+            return h + '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">' + filmes.map(f => card(f, true)).join('') + '</div>';
+        }
+
+        /* ---------- Renderização ---------- */
+        function renderChips() {
+            const generos = ['Todos'].concat(Array.from(new Set(visiveis().map(f => f.genero))));
+            if (generos.indexOf(genero) === -1) genero = 'Todos';
+            $('chips').innerHTML = generos.map(g =>
+                '<button type="button" data-genero="' + g + '" class="px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ' +
+                (g === genero ? 'bg-red-600 border-red-600 text-white' : 'bg-gray-900 border-gray-700 text-gray-300 hover:border-red-500 hover:text-white') + '">' + g + '</button>'
+            ).join('');
+        }
+
+        function renderNav() {
+            const on = 'bg-gray-800 text-white', off = 'text-gray-400 hover:text-white';
+            $('nav-home').className = 'px-3 py-2 rounded-lg transition-colors ' + (view === 'home' ? on : off);
+            $('nav-list').className = 'px-3 py-2 rounded-lg transition-colors ' + (view === 'lista' ? on : off);
+            $('badge-list').textContent = lista.length;
+        }
+
+        function renderHero(f) {
+            $('hero-img').src = f.capa;
+            $('hero-genero').textContent = 'Em destaque • ' + f.genero;
+            $('hero-titulo').textContent = f.nome;
+            $('hero-meta').innerHTML = '<span>' + f.ano + '</span>' + seloIdade(f.idade, 'text-xs px-2 py-1') + '<span>' + f.produtora + '</span>';
+            $('hero-resumo').textContent = f.resumo;
+            $('hero-info').dataset.id = f.id;
+            const v = $('hero-video');
+            if (cfg.auto) {
+                if (v.getAttribute('src') !== f.trailer) { v.src = f.trailer; }
+                v.muted = true;
+                v.play().then(() => { v.classList.replace('opacity-0', 'opacity-60'); }).catch(() => { });
+            } else {
+                v.pause(); v.classList.replace('opacity-60', 'opacity-0');
+            }
+        }
+
+        function render() {
+            renderNav(); renderChips();
+            const base = visiveis();
+            const q = norm(busca.trim());
+            const filtrando = q !== '' || genero !== 'Todos';
+            const mostrarHero = view === 'home' && !filtrando && base.length > 0;
+            $('hero').classList.toggle('hidden', !mostrarHero);
+            $('chips').classList.toggle('hidden', view === 'lista');
+
+            let html = '';
+            if (view === 'lista') {
+                const salvos = base.filter(f => salvo(f.id));
+                html = grade('Minha Lista (' + salvos.length + ')', salvos, ['Sua lista está vazia.', 'Toque no coração de um filme para salvá-lo aqui.']);
+            } else if (filtrando) {
+                const res = base.filter(f => (genero === 'Todos' || f.genero === genero) &&
+                    (q === '' || norm([f.nome, f.autor, f.produtora, f.genero, f.ano].join(' ')).indexOf(q) !== -1));
+                const titulo = q ? 'Resultados para “' + busca.trim().replace(/</g, '&lt;') + '”' + (genero !== 'Todos' ? ' em ' + genero : '') : genero;
+                html = grade(titulo + ' (' + res.length + ')', res, ['Nenhum filme encontrado.', 'Tente outro nome, autor ou gênero.']);
+            } else {
+                if (mostrarHero) renderHero(base[0]);
+                const salvos = base.filter(f => salvo(f.id));
+                html += fileira('Minha Lista', salvos, 'row-lista');
+                html += fileira('Em Alta', base.slice(0, 10), 'row-alta');
+                html += fileira('Lançamentos de 2025', base.filter(f => f.ano >= 2025), 'row-novos');
+                Array.from(new Set(base.map(f => f.genero))).forEach(g => {
+                    html += fileira(g, base.filter(f => f.genero === g), 'row-' + slug(g));
+                });
+                if (!base.length) html = grade('Catálogo', [], ['Nenhum filme disponível.', 'Aumente a classificação máxima em Configurações.']);
+            }
+            $('conteudo').innerHTML = html;
+            if (!mostrarHero) { $('hero-video').pause(); }
+        }
+
+        /* ---------- Lista ---------- */
+        function alternarSalvo(id) {
+            lista = salvo(id) ? lista.filter(x => x !== id) : lista.concat(id);
+            salvarJSON(CHAVE_LISTA, lista);
+            render();
+            if (filmeAberto) atualizarBotaoSalvar();
+        }
+
+        function atualizarBotaoSalvar() {
+            const s = salvo(filmeAberto.id);
+            $('m-salvar').innerHTML = '<span class="' + (s ? 'text-red-500' : '') + '">' + coracao(s) + '</span><span>' + (s ? 'Na Minha Lista' : 'Adicionar à Minha Lista') + '</span>';
+        }
+
+        /* ---------- Modais ---------- */
+        function abrirModal(id) {
+            $(id).classList.replace('hidden', 'flex');
+            document.body.classList.add('overflow-hidden');
+        }
+        function fecharModais() {
+            ['modal-filme', 'modal-config', 'modal-conta'].forEach(id => $(id).classList.replace('flex', 'hidden'));
+            document.body.classList.remove('overflow-hidden');
+            const v = $('m-video'); v.pause(); v.removeAttribute('src'); v.load();
+            filmeAberto = null;
+        }
+
+        function abrirFilme(id) {
+            const f = FILMES.find(x => x.id === id);
+            if (!f) return;
+            filmeAberto = f;
+            $('m-genero').textContent = f.genero;
+            $('m-titulo').textContent = f.nome;
+            $('m-meta').innerHTML = '<span>' + f.ano + '</span>' + seloIdade(f.idade, 'text-xs px-2 py-1') + '<span class="text-gray-500">Classificação: ' + idadeTxt(f.idade) + '</span>';
+            $('m-resumo').textContent = f.resumo;
+            $('m-autor').textContent = f.autor;
+            $('m-produtora').textContent = f.produtora;
+            $('m-ano').textContent = f.ano;
+            $('m-capa-box').className = 'relative aspect-[3/4] rounded-xl overflow-hidden bg-gradient-to-br shadow-lg shadow-black/50 ' + f.cor;
+            $('m-capa-box').innerHTML = '<img alt="Capa de ' + f.nome + '" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">';
+            $('m-capa-box').firstChild.src = f.capa;
+            const v = $('m-video');
+            v.poster = f.capa;
+            v.src = f.trailer;
+            v.muted = !cfg.som;
+            if (cfg.auto) { v.play().catch(() => { }); }
+            atualizarBotaoSalvar();
+            abrirModal('modal-filme');
+        }
+
+        function abrirConfig() {
+            $('cfg-auto').checked = cfg.auto;
+            $('cfg-som').checked = cfg.som;
+            $('cfg-idade').value = cfg.maxIdade;
+            abrirModal('modal-config');
+        }
+
+        function abrirConta() {
+            $('cta-qtd').textContent = lista.length;
+            $('cta-total').textContent = FILMES.length;
+            abrirModal('modal-conta');
+        }
+
+        function sair() {
+            limparSessao();
+            window.location.href = 'index.html';
+        }
+
+        function acao(nome) {
+            $('menu-conta').classList.add('hidden');
+            if (nome === 'conta') { fecharModais(); abrirConta(); }
+            if (nome === 'config') { fecharModais(); abrirConfig(); }
+            if (nome === 'lista') { fecharModais(); view = 'lista'; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            if (nome === 'sair') sair();
+        }
+
+        /* ---------- Eventos ---------- */
+        document.addEventListener('click', (e) => {
+            const t = e.target;
+
+            const bSalvar = t.closest('[data-salvar]');
+            if (bSalvar) { e.stopPropagation(); alternarSalvo(Number(bSalvar.dataset.salvar)); return; }
+
+            const bRolar = t.closest('[data-rolar]');
+            if (bRolar) {
+                const linha = $(bRolar.dataset.alvo);
+                linha.scrollBy({ left: Number(bRolar.dataset.rolar) * linha.clientWidth * 0.85, behavior: 'smooth' });
+                return;
+            }
+
+            const bGenero = t.closest('[data-genero]');
+            if (bGenero) { genero = bGenero.dataset.genero; render(); return; }
+
+            const bAcao = t.closest('[data-acao]');
+            if (bAcao) { acao(bAcao.dataset.acao); return; }
+
+            if (t.closest('[data-fechar]')) { fecharModais(); return; }
+
+            const hero = t.closest('#hero-info');
+            if (hero) { abrirFilme(Number(hero.dataset.id)); return; }
+
+            const c = t.closest('[data-id]');
+            if (c) { abrirFilme(Number(c.dataset.id)); return; }
+
+            if (!t.closest('#btn-conta')) { $('menu-conta').classList.add('hidden'); }
+        });
+
+        $('btn-conta').addEventListener('click', () => $('menu-conta').classList.toggle('hidden'));
+        $('nav-home').addEventListener('click', () => { view = 'home'; genero = 'Todos'; busca = ''; $('busca').value = ''; render(); });
+        $('nav-list').addEventListener('click', () => { view = 'lista'; render(); });
+        $('m-salvar').addEventListener('click', () => { if (filmeAberto) alternarSalvo(filmeAberto.id); });
+
+        $('busca').addEventListener('input', (e) => {
+            busca = e.target.value;
+            if (view === 'lista') view = 'home';
+            render();
+        });
+
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { fecharModais(); $('menu-conta').classList.add('hidden'); } });
+
+        // Configurações
+        $('cfg-auto').addEventListener('change', (e) => { cfg.auto = e.target.checked; salvarJSON('cinetrack_config', cfg); render(); });
+        $('cfg-som').addEventListener('change', (e) => { cfg.som = e.target.checked; salvarJSON('cinetrack_config', cfg); });
+        $('cfg-idade').addEventListener('change', (e) => { cfg.maxIdade = e.target.value; salvarJSON('cinetrack_config', cfg); render(); });
+        $('cfg-limpar').addEventListener('click', () => {
+            if (lista.length && confirm('Remover todos os filmes da Minha Lista?')) { lista = []; salvarJSON(CHAVE_LISTA, lista); render(); }
+        });
+        $('cfg-padrao').addEventListener('click', () => {
+            cfg = Object.assign({}, PADRAO); salvarJSON('cinetrack_config', cfg); abrirConfig(); render();
+        });
+
+        /* ---------- Início ---------- */
+        const inicial = (sessao.nome || '?').trim().charAt(0).toUpperCase() || '?';
+        const primeiroNome = (sessao.nome || 'Conta').trim().split(' ')[0];
+        $('avatar').textContent = inicial;
+        $('conta-nome').textContent = primeiroNome;
+        $('menu-nome').textContent = sessao.nome;
+        $('menu-email').textContent = sessao.email;
+        $('cta-avatar').textContent = inicial;
+        $('cta-titulo').textContent = sessao.nome;
+        $('cta-email').textContent = sessao.email;
+
+        render();
+    </script>
+</body>
+
+</html>
